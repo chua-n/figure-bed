@@ -1,0 +1,30 @@
+name: deploy to Aliyun ECS
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+    types:
+      - closed
+
+jobs:
+  checkout-and-deploy:
+    if: github.event_name == 'push' || github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout the code
+        uses: actions/checkout@v4
+
+      - name: Deploy to Aliyun ECS
+        uses: easingthemes/ssh-deploy@main
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.ALIYUN_SSH_PRIVATE_KEY }}
+          REMOTE_HOST: ${{ secrets.ALIYUN_HOST }}
+          REMOTE_USER: ${{ secrets.ALIYUN_USER }}
+          ARGS: "-avzr --delete"
+          SOURCE: /
+          TARGET: ${{ secrets.ALIYUN_DEPLOY_TARGET }}
+          EXCLUDE: "/.git/, /.github/"
